@@ -13,7 +13,7 @@ def calculate_eye_aspect_ratio(eye):
     
     return eye_aspect_ratio
 
-def get_eye_aspect(frame,eye_aspect_ratio_threshold):
+def get_eye_aspect(frame, eye_aspect_ratio_threshold = 0.3):
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
@@ -50,7 +50,7 @@ def get_eye_aspect(frame,eye_aspect_ratio_threshold):
     
 if __name__ == "__main__":
     frame =  cv2.imread("/home/parag/Pictures/Webcam/2020-02-05-092935.jpg")
-    if(get_eye_aspect(frame,0.3)):
+    if(get_eye_aspect(frame)):
         print("Drowsy")
     else:
         print("Not Drowsy")
@@ -65,3 +65,4 @@ if __name__ == "__main__":
             
             
         
+
