@@ -38,7 +38,13 @@ def get_eye_aspect(frame, eye_aspect_ratio_threshold = 0.3):
         right_eye_aspect_ratio = calculate_eye_aspect_ratio(right_eye)
         
         average_eye_aspect_ratio = (left_eye_aspect_ratio + right_eye_aspect_ratio)/2.0
-    
+        
+        #If you need to see the image
+        #cv2.putText(frame, "EYE ASPECT RATIO: {:.2f}".format(average_eye_aspect_ratio),(300,30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,0,255), 2)
+            
+        #cv2.imshow("frame", frame)
+        #cv2.waitKey(10000)
+        #cv2.destroyAllWindows()     
         if average_eye_aspect_ratio < eye_aspect_ratio_threshold:
         
             return True
@@ -54,15 +60,4 @@ if __name__ == "__main__":
         print("Drowsy")
     else:
         print("Not Drowsy")
-
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        
 
