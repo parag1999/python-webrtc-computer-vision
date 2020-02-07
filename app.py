@@ -1,38 +1,19 @@
-import argparse
 import asyncio
 import json
 import logging
 import os
-import ssl
 import uuid
 
 from aiohttp import web
-from av import VideoFrame
+import aiohttp_cors
 
-from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
-from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
+from aiortc import RTCPeerConnection, RTCSessionDescription
+from pipeline import Pipeline
 
 ROOT = os.path.dirname(__file__)
 
 logger = logging.getLogger("pc")
 pcs = set()
-
-
-class VideoTransformTrack(MediaStreamTrack):
-    """
-    A video stream track that transforms frames from an another track.
-    """
-
-    kind = "video"
-
-    def __init__(self, track):
-        super().__init__()  # don't forget this!
-        self.track = track
-        self.transform = transform
-
-    async def recv(self):
-        frame = await self.track.recv()
-        img = frame.to_ndarray(format="bgr24")
 
 
 async def offer(request):
@@ -49,7 +30,7 @@ async def offer(request):
     log_info("Created for %s", request.remote)
 
     # prepare local media
-    recorder = MediaRecorder('/Users/vikrantgajria/proj/sih/rec.mp4')
+    pl = Pipeline()
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -68,20 +49,21 @@ async def offer(request):
     @pc.on("track")
     def on_track(track):
         log_info("Track %s received", track.kind)
-        recorder.addTrack(track)
+        pl.add_track(track)
 
         @track.on("ended")
         async def on_ended():
             log_info("Track %s ended", track.kind)
-            await recorder.stop()
 
     # handle offer
     await pc.setRemoteDescription(offer)
-    await recorder.start()
+    await pl.start()
 
     # send answer
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)
+
+    print("Sending answer")
 
     return web.Response(
         content_type="application/json",
@@ -105,8 +87,19 @@ if __name__ == "__main__":
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
 
-    app.router.add_get("/", index)
-    app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
 
-    web.run_app(app, access_log=None, port=args.port, ssl_context=ssl_context)
+    # Configure default CORS settings.
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*",
+        )
+    })
+
+    # Configure CORS on all routes.
+    for route in list(app.router.routes()):
+        cors.add(route)
+
+    web.run_app(app, access_log=None, port=5555)
