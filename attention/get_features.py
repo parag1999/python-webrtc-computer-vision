@@ -1,7 +1,6 @@
 
 import dlib
 import cv2
-from imutils import face_utils
 from .utility import calculate_eye_aspect_ratio, mouth_open, get_score
 from .gaze_tracking import GazeTracking
 import os
