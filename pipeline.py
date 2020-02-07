@@ -1,9 +1,11 @@
 import cv2 as cv2
 import asyncio
-from celery import Celery
 
+from attention.get_feature_image import get_attention_feature
 from aiortc.contrib.media import MediaStreamTrack, MediaStreamError
 
+
+evt_loop = asyncio.Queue()
 
 class Pipeline:
     """
@@ -34,6 +36,8 @@ class Pipeline:
 
     async def __run_track(self, track):
         print(f"Running track for {track}")
+        frame_num = 0
+        tasks = []
         while True:
             try:
                 frame = await track.recv()
@@ -41,4 +45,7 @@ class Pipeline:
                 print(e)
                 return
             data = frame.to_ndarray(format="bgr24")
-            print(data)
+            if frame_num % 30 == 0:
+                task = asyncio.create_task(get_attention_feature(data, num=frame_num))
+                tasks.append(task)
+            frame_num += 1

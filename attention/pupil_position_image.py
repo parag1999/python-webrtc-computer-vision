@@ -1,5 +1,5 @@
 import cv2
-from gaze_tracking import GazeTracking
+from .gaze_tracking import GazeTracking
 
 def get_pupil_pos(frame, detector, predictor):
     gaze = GazeTracking(detector=detector, predictor = predictor)
